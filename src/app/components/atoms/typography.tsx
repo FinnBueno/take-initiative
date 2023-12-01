@@ -10,9 +10,12 @@ export const Text = styled.p`
 `
 
 export const HandwritingTitle = styled(Title)`
-  font-family: 'Homemade Apple', cursive;
+  /* font-family: 'Homemade Apple', bold;
+  margin-top: 40px;
+  font-size: 48px; */
 `
 
 export const HandwritingText = styled(Text)`
   font-family: 'Homemade Apple', cursive;
+  font-size: 14px;
 `
