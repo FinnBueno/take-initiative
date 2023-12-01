@@ -1,8 +1,9 @@
 import styled from "styled-components";
 
-export const Title = styled.h1`
+export const Title = styled.h1<{ size?: string }>`
   line-height: 1;
   margin: 0;
+  ${props => props.size ? `font-size: ${props.size};` : ''}
 `
 
 export const Text = styled.p`

@@ -1,5 +1,6 @@
 import styled from 'styled-components'
-import { HandwritingText, HandwritingTitle, Text, Title } from '../components/atoms/typography'
+import { HandwritingText, Text, Title } from '../components/atoms/typography'
+import { D20 } from '../components/atoms/svg/d20'
 
 const INTRO_TEXTS = [
   'You take your sword to strike at the goblin...',
@@ -12,13 +13,23 @@ export const InactivePage = () => {
   return (
     <TotalContainer>
       <HandwritingText>{randomIntroText()}</HandwritingText>
-      <HandwritingTitle style={{ marginBottom: '48px' }}>
-        Roll initiative!
-      </HandwritingTitle>
+      <TitleContainer style={{ marginBottom: '48px', marginTop: '24px' }}>
+        <D20 color='white' size='40px' />
+        <Title size='42px'>
+          Roll initiative!
+        </Title>
+        <D20 color='white' size='40px' />
+      </TitleContainer>
       <Text>Select tokens on the map and then add them to the initiative using the context menu</Text>
     </TotalContainer>
   )
 }
+
+const TitleContainer = styled.div`
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+`
 
 const TotalContainer = styled.div`
   margin: 12px;
