@@ -1,34 +1,33 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useEffect, useState } from 'react'
 import './main.css'
+import ORB from '@owlbear-rodeo/sdk'
+import { castMetadata } from '../util/general'
+import { SceneInitiativeState, SceneMetadata } from '../util/initiative'
+import { StartingPage } from './starting'
+import { InactivePage } from './inactive'
 
 function App() {
-  const [count, setCount] = useState(0)
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  const [initiativeState, setInitiativeState] = useState<SceneInitiativeState>('INACTIVE')
+
+  const setState = (sceneMetadata: SceneMetadata) => {
+    if (sceneMetadata)
+      setInitiativeState(sceneMetadata.state)
+  }
+
+  useEffect(() => {
+    ORB.onReady(() => {
+      ORB.scene.onReadyChange(ready => {
+        if (!ready) return
+        ORB.scene.onMetadataChange(md => setState(castMetadata<SceneMetadata>(md)))
+        ORB.scene.getMetadata().then(md => setState(castMetadata<SceneMetadata>(md)))
+      })
+    })
+  }, [])
+  switch (initiativeState) {
+    case 'INACTIVE': return <InactivePage />
+    case 'STARTING': return <StartingPage />
+    case 'RUNNING': return <>Running!</>
+  }
 }
 
 export default App

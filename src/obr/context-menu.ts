@@ -1,5 +1,5 @@
-import ORB, { Item } from '@owlbear-rodeo/sdk'
-import { extId } from '../util/general'
+import ORB, { Image, Item } from '@owlbear-rodeo/sdk'
+import { buildCharacterMetadata, buildSceneMetadata, extId } from '../util/general'
 import { INITIATIVE_KEY } from '../util/constants'
 
 export const setupContextMenu = () => {
@@ -7,7 +7,7 @@ export const setupContextMenu = () => {
         id: extId('context-menu'),
         icons: [
             {
-                icon: '/add.svg',
+                icon: '/d20.svg',
                 label: 'Add to initiative',
                 filter: {
                     roles: ['GM'],
@@ -27,9 +27,17 @@ export const setupContextMenu = () => {
             }
         ],
         onClick(context) {
-            ORB.scene.items.updateItems(context.items, items => {
-                for (const item of items) {
-                    item.metadata
+            ORB.scene.items.updateItems(context.items, (items: Item[]) => {
+                const images = items.filter(token => token.type === 'IMAGE') as Image[]
+                // const { named, unnamed } = images.reduce<{named:Image[], unnamed:Image[]}>((allImages, image) => {
+                //     allImages[image.text.plainText ? 'named' : 'unnamed'].push(image)
+                //     return allImages
+                // }, { named: [], unnamed: [] })
+                // window.alert(`Found ${named.length} named tokens: ${named.map(image => image.text.plainText)}`)
+                // window.alert(`Found ${unnamed.length} unnamed tokens`)
+                ORB.scene.setMetadata(buildSceneMetadata({ state: 'STARTING' }))
+                for (const image of images) {
+                    image.metadata = buildCharacterMetadata()
                 }
             })
         },
