@@ -1,9 +1,18 @@
-import styled from "styled-components";
+import styled from 'styled-components'
 
-export const Title = styled.h1<{ size?: string }>`
+const titleSizeLevels = {
+  1: '42px',
+  2: '36px',
+  3: '28px',
+  4: '22px',
+}
+
+type TitleSizeOptions = keyof typeof titleSizeLevels
+
+export const Title = styled.h1<{ level?: TitleSizeOptions }>`
   line-height: 1;
   margin: 0;
-  ${props => props.size ? `font-size: ${props.size};` : ''}
+  ${props => `font-size: ${titleSizeLevels[props.level ?? 1]};`}
 `
 
 export const Text = styled.p`

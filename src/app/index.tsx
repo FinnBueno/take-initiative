@@ -10,8 +10,7 @@ function App() {
   const [initiativeState, setInitiativeState] = useState<SceneInitiativeState>('INACTIVE')
 
   const setState = (sceneMetadata: SceneMetadata) => {
-    if (sceneMetadata)
-      setInitiativeState(sceneMetadata.state)
+    if (sceneMetadata) setInitiativeState(sceneMetadata.state)
   }
 
   useEffect(() => {
@@ -22,11 +21,15 @@ function App() {
         ORB.scene.getMetadata().then(md => setState(castMetadata<SceneMetadata>(md)))
       })
     })
+    ORB.scene.getMetadata().then(md => setState(castMetadata<SceneMetadata>(md)))
   }, [])
   switch (initiativeState) {
-    case 'INACTIVE': return <InactivePage />
-    case 'STARTING': return <StartingPage />
-    case 'RUNNING': return <>Running!</>
+    case 'INACTIVE':
+      return <InactivePage />
+    case 'STARTING':
+      return <StartingPage />
+    case 'RUNNING':
+      return <>Running!</>
   }
 }
 
