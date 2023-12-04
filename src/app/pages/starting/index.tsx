@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import ORB, { Image, Item, StopInteraction } from '@owlbear-rodeo/sdk'
-import { buildSceneMetadata, getMetadata, removeCharacterFromInitiative } from '../../util/general'
-import { CharacterMetadata } from '../../util/initiative'
+import { buildSceneMetadata, getMetadata, removeCharacterFromInitiative } from '../../../util/general'
+import { CharacterMetadata } from '../../../util/metadata'
 import { ConfigureNamedUnits } from './named'
 import styled from 'styled-components'
+import { Button } from '../../components/atoms/button'
 
 let interactions: { [id: string]: StopInteraction } = {}
 
@@ -17,9 +18,12 @@ export const StartingPage = () => {
   }
 
   useEffect(() => {
-    ORB.scene.items.onChange(updateTurnTakers)
+    const endOnChange = ORB.scene.items.onChange(updateTurnTakers)
     updateTurnTakers()
-    return clearInteractions
+    return () => {
+      clearInteractions()
+      endOnChange()
+    }
   }, [])
 
   const clear = () => {
@@ -28,6 +32,7 @@ export const StartingPage = () => {
       (items: Item[]) => items.forEach(removeCharacterFromInitiative)
     )
     ORB.scene.setMetadata(buildSceneMetadata({ state: 'INACTIVE' }))
+    ORB.scene.getMetadata().then(console.log)
   }
 
   const clearInteractions = () => {
@@ -73,7 +78,7 @@ export const StartingPage = () => {
           </li>
         ))}
       </ol>
-      <button onClick={clear}>Clear</button>
+      <Button onClick={clear}>Clear</Button>
     </Wrapper>
   )
 }

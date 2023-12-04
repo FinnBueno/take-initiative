@@ -1,6 +1,6 @@
 import styled from 'styled-components'
-import { HandwritingText, Text, Title } from '../components/atoms/typography'
-import { D20 } from '../components/atoms/svg/d20'
+import { HandwritingText, Text, Title } from '../../components/atoms/typography'
+import { D20 } from '../../components/atoms/svg/d20'
 
 const INTRO_TEXTS = ['You take your sword to strike at the goblin...', 'You line up your arrow, aiming for the orc...']
 
@@ -28,4 +28,5 @@ const TitleContainer = styled.div`
 
 const TotalContainer = styled.div`
   margin: 12px;
+  margin-top: 32px;
 `
