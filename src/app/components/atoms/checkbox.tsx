@@ -2,12 +2,12 @@ import styled from 'styled-components'
 
 export const Checkbox = ({
   onToggle,
-  defaultValue,
+  defaultChecked,
 }: {
   onToggle: (toggledOn: boolean) => void
-  defaultValue: boolean
+  defaultChecked: boolean
 }) => {
-  return <Input type='checkbox' value={String(defaultValue)} onChange={e => onToggle(e.currentTarget.checked)} />
+  return <Input type='checkbox' checked={defaultChecked} onChange={e => onToggle(e.currentTarget.checked)} />
 }
 
 // https://moderncss.dev/pure-css-custom-checkbox-style/

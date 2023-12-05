@@ -2,6 +2,12 @@
 
 export type RoomMetadata = {
   preventPlayersFromEnteringOwnInitiative?: boolean
+  hideTokensOnInitiativeInput?: boolean
+}
+
+export const defaultRoomMetadata: RoomMetadata = {
+  preventPlayersFromEnteringOwnInitiative: false,
+  hideTokensOnInitiativeInput: false,
 }
 
 // scene metadata

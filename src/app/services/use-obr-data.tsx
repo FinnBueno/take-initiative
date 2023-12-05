@@ -3,29 +3,39 @@ import { useEffect } from 'react'
 
 type Callback<T> = (param: T) => void
 
-type OBRFetcher<T> = {
-  onChange: { listener: (callback: Callback<T>) => () => void; run: Callback<T> }
-  get: { listener: () => Promise<T>; run: Callback<T> }
+// type Fetcher<T> = {
+//   onChange: { listener: (callback: Callback<T>) => () => void; run: Callback<T> }
+//   get: { listener: () => Promise<T>; run: Callback<T> }
+//   waitForScene?: boolean
+// }
+
+export type Fetcher<T> = {
+  onChange: (callback: Callback<T>) => () => void
+  get: () => Promise<T>
+  run: Callback<T>
   waitForScene?: boolean
 }
 
-export function useOBR<T>(obrFetchers: OBRFetcher<T>) {
-  const { onChange, get, waitForScene } = obrFetchers
+export function useOBR<T>(fetchers: Fetcher<T>) {
+  const { onChange, get, run, waitForScene } = fetchers
   useEffect(() => {
     let returnFunction = undefined
     OBR.onReady(() => {
       if (waitForScene) {
         OBR.scene.onReadyChange(ready => {
           if (!ready) return
-          returnFunction = onChange.listener(onChange.run)
+          returnFunction = onChange(run)
+          get().then(run)
         })
       } else {
-        returnFunction = onChange.listener(onChange.run)
+        returnFunction = onChange(run)
+        get().then(run)
       }
     })
-    if (OBR.isReady && waitForScene ? OBR.scene.isReady : true) {
-      get.listener().then(get.run)
+    if (OBR.isReady) {
+      get().then(run)
     }
     return returnFunction
-  })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 }

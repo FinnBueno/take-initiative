@@ -2,34 +2,42 @@ import styled from 'styled-components'
 import { Text, Title } from '../components/atoms/typography'
 import { Checkbox } from '../components/atoms/checkbox'
 import OBR from '@owlbear-rodeo/sdk'
-import { buildRoomMetadata, castMetadata } from '../../util/general'
-import { RoomMetadata } from '../../util/metadata'
-import { useState } from 'react'
+import { buildRoomMetadata } from '../../util/general'
+import { RoomMetadata, defaultRoomMetadata } from '../../util/metadata'
+import { useRoomMetadata } from '../services/metadata/use-room'
 
-type Setting = 'SUBMIT_OWN_INITIATIVE'
+type Setting = keyof RoomMetadata
 
-const toggleSetting = (setting: Setting, isTrue: boolean) => {
+const toggleSetting = (setting: Setting, isTrue: boolean, oldSettings: RoomMetadata) => {
   if (!OBR.isReady) return
-  OBR.room.getMetadata().then(md => {
-    const oldRoomMetadata = castMetadata<RoomMetadata>(md)
-    switch (setting) {
-      case 'SUBMIT_OWN_INITIATIVE':
-        OBR.room.setMetadata(buildRoomMetadata({ preventPlayersFromEnteringOwnInitiative: !isTrue }, oldRoomMetadata))
-        break
-    }
-  })
+  switch (setting) {
+    case 'preventPlayersFromEnteringOwnInitiative':
+      OBR.room.setMetadata(buildRoomMetadata({ preventPlayersFromEnteringOwnInitiative: !isTrue }, oldSettings))
+      break
+    case 'hideTokensOnInitiativeInput':
+      OBR.room.setMetadata(buildRoomMetadata({ hideTokensOnInitiativeInput: isTrue }, oldSettings))
+      break
+  }
 }
 
 export const Settings = ({ open }: { open: boolean }) => {
-  const [defaultSettings, setDefaultSettings] = useState<boolean[]>([false])
+  const roomSettings = useRoomMetadata()
+
   return (
     <Container open={open}>
       <Title $level={4}>Settings</Title>
       <SettingRow>
         <Text>Allow players to submit their own initiative</Text>
         <Checkbox
-          defaultValue={defaultSettings[0]}
-          onToggle={isTrue => toggleSetting('SUBMIT_OWN_INITIATIVE', isTrue)}
+          defaultChecked={!roomSettings.preventPlayersFromEnteringOwnInitiative}
+          onToggle={isTrue => toggleSetting('preventPlayersFromEnteringOwnInitiative', isTrue, defaultRoomMetadata)}
+        />
+      </SettingRow>
+      <SettingRow>
+        <Text>Hide tokens on initiative input</Text>
+        <Checkbox
+          defaultChecked={!!roomSettings.hideTokensOnInitiativeInput}
+          onToggle={isTrue => toggleSetting('hideTokensOnInitiativeInput', isTrue, defaultRoomMetadata)}
         />
       </SettingRow>
     </Container>
@@ -50,7 +58,7 @@ const Container = styled.div<{ open: boolean }>`
   flex-direction: column;
   justify-content: flex-start;
   padding: 8px 12px 0 12px;
-  height: ${props => (props.open ? '50px' : '0')};
+  height: ${props => (props.open ? '70px' : '0')};
   opacity: ${props => (props.open ? '100%' : '0%')};
   transition: opacity 250ms, height 250ms;
 `

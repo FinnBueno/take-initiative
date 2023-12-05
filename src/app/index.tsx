@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from 'react'
 import './main.css'
-import ORB, { Theme } from '@owlbear-rodeo/sdk'
+import ORB, { Metadata, Theme } from '@owlbear-rodeo/sdk'
 import { castMetadata } from '../util/general'
 import { SceneInitiativeState, SceneMetadata } from '../util/metadata'
 import { StartingPage } from './pages/starting'
@@ -10,6 +10,9 @@ import styled, { createGlobalStyle } from 'styled-components'
 import { Cogs } from './components/atoms/svg/cogs'
 import { ButtonIcon } from './components/atoms/button-icon'
 import { Settings } from './pages/settings'
+import { useOBR } from './services/use-obr-data'
+import OBR from '@owlbear-rodeo/sdk'
+import { SettingsButton } from './pages/settings/settings-button'
 
 function App() {
   const [theme, setTheme] = useState<Theme | undefined>()
@@ -22,23 +25,18 @@ function App() {
     if (sceneMetadata) setInitiativeState(sceneMetadata.state)
   }
 
-  useEffect(() => {
-    const returnFunctions: (() => void)[] = []
-    ORB.onReady(() => {
-      ORB.scene.onReadyChange(ready => {
-        if (!ready) return
-        returnFunctions.push(ORB.scene.onMetadataChange(md => setState(castMetadata<SceneMetadata>(md))))
-        returnFunctions.push(ORB.theme.onChange(theme => setTheme(theme)))
-        ORB.theme.getTheme().then(setTheme)
-        ORB.scene.getMetadata().then(md => setState(castMetadata<SceneMetadata>(md)))
-      })
-    })
-    if (ORB.isReady) {
-      ORB.theme.getTheme().then(setTheme)
-      ORB.scene.getMetadata().then(md => setState(castMetadata<SceneMetadata>(md)))
-    }
-    return () => returnFunctions.forEach(func => func())
-  }, [])
+  useOBR<Metadata>({
+    onChange: cb => OBR.scene.onMetadataChange(cb),
+    get: () => OBR.scene.getMetadata(),
+    run: md => setState(castMetadata<SceneMetadata>(md)),
+    waitForScene: true,
+  })
+
+  useOBR<Theme>({
+    onChange: cb => OBR.theme.onChange(cb),
+    get: () => OBR.theme.getTheme(),
+    run: setTheme,
+  })
 
   let content: ReactNode
   switch (initiativeState) {
@@ -57,11 +55,7 @@ function App() {
   return (
     <GMIDContextProvider>
       {theme && <GlobalStyle isLight={theme.mode === 'LIGHT'} theme={theme} />}
-      <CogsContainer>
-        <CogsButton onClick={() => setShowSettings(s => !s)}>
-          <Cogs />
-        </CogsButton>
-      </CogsContainer>
+      <SettingsButton onPress={() => setShowSettings(s => !s)} />
       <Container>
         <Settings open={showSettings} />
         {content}
@@ -83,17 +77,6 @@ const GlobalStyle = createGlobalStyle<{ isLight: boolean; theme: Theme }>`
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-`
-
-const CogsContainer = styled.div`
-  position: absolute;
-  top: 8px;
-  right: 12px;
-`
-
-const CogsButton = styled(ButtonIcon)`
-  position: relative;
-  z-index: 10;
 `
 
 export default App

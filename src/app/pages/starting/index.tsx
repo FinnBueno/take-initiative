@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react'
 import ORB, { Image, Item, StopInteraction } from '@owlbear-rodeo/sdk'
 import { buildSceneMetadata, getMetadata, removeCharacterFromInitiative } from '../../../util/general'
 import { CharacterMetadata } from '../../../util/metadata'
-import { ConfigureNamedUnits } from './named'
 import styled from 'styled-components'
 import { Button } from '../../components/atoms/button'
+import { useGMData } from '../../services/gm-data/hook'
+import { useRoomMetadata } from '../../services/metadata/use-room'
+import { ConfigureNamedUnits } from './named'
+import { PlayerInitiativeView } from './player-view'
 
 let interactions: { [id: string]: StopInteraction } = {}
 
@@ -32,7 +35,6 @@ export const StartingPage = () => {
       (items: Item[]) => items.forEach(removeCharacterFromInitiative)
     )
     ORB.scene.setMetadata(buildSceneMetadata({ state: 'INACTIVE' }))
-    ORB.scene.getMetadata().then(console.log)
   }
 
   const clearInteractions = () => {
@@ -66,6 +68,22 @@ export const StartingPage = () => {
     },
     [[], []]
   )
+
+  const { isGM } = useGMData()
+
+  const roomSettings = useRoomMetadata()
+
+  if (!isGM) {
+    if (roomSettings.preventPlayersFromEnteringOwnInitiative) {
+      return <Wrapper>Entering initiatives...</Wrapper>
+    } else {
+      return (
+        <Wrapper>
+          <PlayerInitiativeView namedTurnTakers={namedTurnTakers} />
+        </Wrapper>
+      )
+    }
+  }
 
   return (
     <Wrapper>
