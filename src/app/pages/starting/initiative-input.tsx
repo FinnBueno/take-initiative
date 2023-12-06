@@ -16,6 +16,7 @@ type Props = {
   hidePlayerTag?: boolean
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void
   initiative?: number
+  defaultValue?: number
 }
 
 export const InitiativeInput = ({
@@ -29,6 +30,7 @@ export const InitiativeInput = ({
   hidePlayerTag = false,
   onChange = () => {},
   initiative,
+  defaultValue,
 }: Props) => (
   <TurnTaker>
     <NameContainer>
@@ -38,12 +40,13 @@ export const InitiativeInput = ({
     </NameContainer>
     {isPlayer && letPlayersEnterOwnInitiative ? (
       <WaitingContainer>
-        <Text>{initiative ?? 'Waiting...'}</Text>
+        <Text>{initiative ? <b>{initiative}</b> : 'Waiting...'}</Text>
       </WaitingContainer>
     ) : (
       <InitiativeInputField
         ref={index > 0 ? nextInputs[index - 1] : undefined}
         type='number'
+        defaultValue={defaultValue}
         onChange={e => onChange(e)}
         onKeyDown={e => {
           if (e.key !== 'Enter') return
@@ -66,6 +69,8 @@ const WaitingContainer = styled.div`
   height: 32px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  min-width: 32px;
 `
 
 const InitiativeInputField = styled.input`

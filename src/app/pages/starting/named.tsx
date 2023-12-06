@@ -35,7 +35,6 @@ export const ConfigureNamedUnits = ({ units }: Props) => {
         {units.map((unit, index) => {
           const isPlayer = !dmData.gmIDs.find(dmID => dmID === unit.createdUserId)
           const characterMetadata = getMetadata<CharacterMetadata>(unit)
-          // console.log(`Unit ${unit.text.plainText} has initiative`, unit.metadata)
           return (
             <InitiativeInput
               key={unit.id}
@@ -47,6 +46,7 @@ export const ConfigureNamedUnits = ({ units }: Props) => {
               hideToken={hideToken}
               onChange={e => setInitiativeForCharacter(unit, NaNToUndefined(e.currentTarget.valueAsNumber))}
               initiative={characterMetadata.initiative}
+              defaultValue={characterMetadata.initiative}
             />
           )
         })}

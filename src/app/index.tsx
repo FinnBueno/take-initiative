@@ -28,7 +28,10 @@ function App() {
   useOBR<Metadata>({
     onChange: cb => OBR.scene.onMetadataChange(cb),
     get: () => OBR.scene.getMetadata(),
-    run: md => setState(castMetadata<SceneMetadata>(md)),
+    run: md => {
+      console.log('State run!', md)
+      setState(castMetadata<SceneMetadata>(md))
+    },
     waitForScene: true,
   })
 

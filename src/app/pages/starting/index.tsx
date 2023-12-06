@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import OBR, { Image, Item, StopInteraction } from '@owlbear-rodeo/sdk'
-import { buildSceneMetadata, getMetadata, removeCharacterFromInitiative } from '../../../util/general'
+import { buildSceneMetadata, getMetadata, removeListFromInitiative } from '../../../util/general'
 import { CharacterMetadata } from '../../../util/metadata'
 import styled from 'styled-components'
 import { Button } from '../../components/atoms/button'
@@ -16,19 +16,10 @@ export const StartingPage = () => {
   const [turnTakers, setTurnTakers] = useState<Image[]>([])
 
   const updateTurnTakers = (newItems: Item[]) => {
-    console.log('turnTaker change!')
+    console.log('Update turn takers')
     const filterdItems = newItems.filter(item => getMetadata<CharacterMetadata>(item)?.partOfCombat)
     setTurnTakers(filterdItems as Image[])
   }
-
-  useEffect(() => {
-    const endOnChange = OBR.scene.items.onChange(updateTurnTakers)
-    OBR.scene.items.getItems().then(updateTurnTakers)
-    return () => {
-      clearInteractions()
-      endOnChange()
-    }
-  }, [])
 
   const clearInteractions = () => {
     Object.values(interactions).forEach(stop => stop())
@@ -44,10 +35,7 @@ export const StartingPage = () => {
   })
 
   const clear = () => {
-    OBR.scene.items.updateItems(
-      i => !!i,
-      (items: Item[]) => items.forEach(removeCharacterFromInitiative)
-    )
+    removeListFromInitiative(turnTakers)
     OBR.scene.setMetadata(buildSceneMetadata({ state: 'INACTIVE' }))
   }
 
@@ -81,6 +69,8 @@ export const StartingPage = () => {
   const { isGM } = useGMData()
 
   const roomSettings = useRoomMetadata()
+
+  console.log('TurnTakers!!', turnTakers)
 
   if (!isGM) {
     if (roomSettings.preventPlayersFromEnteringOwnInitiative) {
