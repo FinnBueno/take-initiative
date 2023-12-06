@@ -1,10 +1,13 @@
-import { Image } from '@owlbear-rodeo/sdk'
+import OBR, { Image } from '@owlbear-rodeo/sdk'
 import styled from 'styled-components'
 import { Text, Title } from '../../components/atoms/typography'
 import { createRef } from 'react'
 import { useGMData } from '../../services/gm-data/hook'
 import { useRoomMetadata } from '../../services/metadata/use-room'
 import { InitiativeInput } from './initiative-input'
+import { getMetadata, setInitiativeForCharacter } from '../../../util/general'
+import { CharacterMetadata } from '../../../util/metadata'
+import { NaNToUndefined } from '../../../util/tools'
 
 type Props = {
   units: Image[]
@@ -31,6 +34,8 @@ export const ConfigureNamedUnits = ({ units }: Props) => {
       <TurnTakerContainer>
         {units.map((unit, index) => {
           const isPlayer = !dmData.gmIDs.find(dmID => dmID === unit.createdUserId)
+          const characterMetadata = getMetadata<CharacterMetadata>(unit)
+          // console.log(`Unit ${unit.text.plainText} has initiative`, unit.metadata)
           return (
             <InitiativeInput
               key={unit.id}
@@ -40,6 +45,8 @@ export const ConfigureNamedUnits = ({ units }: Props) => {
               index={index}
               nextInputs={nextInputs}
               hideToken={hideToken}
+              onChange={e => setInitiativeForCharacter(unit, NaNToUndefined(e.currentTarget.valueAsNumber))}
+              initiative={characterMetadata.initiative}
             />
           )
         })}

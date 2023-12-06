@@ -1,4 +1,4 @@
-import { RefObject } from 'react'
+import { RefObject, ChangeEvent } from 'react'
 import styled from 'styled-components'
 import { Image } from '@owlbear-rodeo/sdk'
 import { Text } from '../../components/atoms/typography'
@@ -14,6 +14,8 @@ type Props = {
   hideToken?: boolean
   disableRandom?: boolean
   hidePlayerTag?: boolean
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void
+  initiative?: number
 }
 
 export const InitiativeInput = ({
@@ -25,6 +27,8 @@ export const InitiativeInput = ({
   hideToken = false,
   disableRandom = false,
   hidePlayerTag = false,
+  onChange = () => {},
+  initiative,
 }: Props) => (
   <TurnTaker>
     <NameContainer>
@@ -34,12 +38,13 @@ export const InitiativeInput = ({
     </NameContainer>
     {isPlayer && letPlayersEnterOwnInitiative ? (
       <WaitingContainer>
-        <Text>Waiting...</Text>
+        <Text>{initiative ?? 'Waiting...'}</Text>
       </WaitingContainer>
     ) : (
       <InitiativeInputField
         ref={index > 0 ? nextInputs[index - 1] : undefined}
         type='number'
+        onChange={e => onChange(e)}
         onKeyDown={e => {
           if (e.key !== 'Enter') return
           if (!disableRandom) {

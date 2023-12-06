@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import ORB, { Image, Item, StopInteraction } from '@owlbear-rodeo/sdk'
+import OBR, { Image, Item, StopInteraction } from '@owlbear-rodeo/sdk'
 import { buildSceneMetadata, getMetadata, removeCharacterFromInitiative } from '../../../util/general'
 import { CharacterMetadata } from '../../../util/metadata'
 import styled from 'styled-components'
@@ -8,38 +8,47 @@ import { useGMData } from '../../services/gm-data/hook'
 import { useRoomMetadata } from '../../services/metadata/use-room'
 import { ConfigureNamedUnits } from './named'
 import { PlayerInitiativeView } from './player-view'
+import { useOBR } from '../../services/use-obr-data'
 
 let interactions: { [id: string]: StopInteraction } = {}
 
 export const StartingPage = () => {
   const [turnTakers, setTurnTakers] = useState<Image[]>([])
 
-  const updateTurnTakers = () => {
-    ORB.scene.items
-      .getItems(item => getMetadata<CharacterMetadata>(item)?.partOfCombat)
-      .then(items => setTurnTakers(items as Image[]))
+  const updateTurnTakers = (newItems: Item[]) => {
+    console.log('turnTaker change!')
+    const filterdItems = newItems.filter(item => getMetadata<CharacterMetadata>(item)?.partOfCombat)
+    setTurnTakers(filterdItems as Image[])
   }
 
   useEffect(() => {
-    const endOnChange = ORB.scene.items.onChange(updateTurnTakers)
-    updateTurnTakers()
+    const endOnChange = OBR.scene.items.onChange(updateTurnTakers)
+    OBR.scene.items.getItems().then(updateTurnTakers)
     return () => {
       clearInteractions()
       endOnChange()
     }
   }, [])
 
-  const clear = () => {
-    ORB.scene.items.updateItems(
-      i => !!i,
-      (items: Item[]) => items.forEach(removeCharacterFromInitiative)
-    )
-    ORB.scene.setMetadata(buildSceneMetadata({ state: 'INACTIVE' }))
-  }
-
   const clearInteractions = () => {
     Object.values(interactions).forEach(stop => stop())
     interactions = {}
+  }
+
+  useOBR<Item[]>({
+    onChange: cb => OBR.scene.items.onChange(cb),
+    get: () => OBR.scene.items.getItems(),
+    run: updateTurnTakers,
+    onUnmount: clearInteractions,
+    waitForScene: true,
+  })
+
+  const clear = () => {
+    OBR.scene.items.updateItems(
+      i => !!i,
+      (items: Item[]) => items.forEach(removeCharacterFromInitiative)
+    )
+    OBR.scene.setMetadata(buildSceneMetadata({ state: 'INACTIVE' }))
   }
 
   const turnTakerClicked = (item: Item) => {
@@ -48,7 +57,7 @@ export const StartingPage = () => {
       delete interactions[item.id]
     } else {
       clearInteractions()
-      ORB.interaction
+      OBR.interaction
         .startItemInteraction(item)
         .then(interactionManager => (interactions = { ...interactions, [item.id]: interactionManager[1] }))
     }

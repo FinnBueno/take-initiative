@@ -5,7 +5,8 @@ import { createRef } from 'react'
 import { useRoomMetadata } from '../../services/metadata/use-room'
 import { Text, Title } from '../../components/atoms/typography'
 import { Button } from '../../components/atoms/button'
-import { D20 } from '../../components/atoms/svg/d20'
+import { setInitiativeForCharacter } from '../../../util/general'
+import { NaNToUndefined } from '../../../util/tools'
 
 type Props = {
   namedTurnTakers: Image[]
@@ -34,12 +35,14 @@ export const PlayerInitiativeView = ({ namedTurnTakers }: Props) => {
             hideToken={roomSettings.hideTokensOnInitiativeInput}
             disableRandom
             hidePlayerTag
+            onChange={e => setInitiativeForCharacter(unit, NaNToUndefined(e.currentTarget.valueAsNumber))}
           />
         )
       })}
-      <SubmitButton>
+      <Text>Now wait for your GM to start combat</Text>
+      {/* <SubmitButton>
         Submit <D20 size='12px' color='white' />
-      </SubmitButton>
+      </SubmitButton> */}
     </div>
   )
 }

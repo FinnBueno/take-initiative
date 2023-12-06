@@ -11,10 +11,10 @@ export const buildMetadata = (metadata: Metadata) => {
 }
 
 export const buildRoomMetadata = (roomMetadata: RoomMetadata, currentMetadata: RoomMetadata = {}) =>
-  buildMetadata({ ...currentMetadata, ...roomMetadata })
+  buildMetadata({ ...currentMetadata, ...roomMetadata }) as RoomMetadata
 
 export const buildSceneMetadata = (sceneData: RequiredSceneMetadata) =>
-  buildMetadata({ ...defaultSceneMetadata, ...sceneData })
+  buildMetadata({ ...defaultSceneMetadata, ...sceneData }) as SceneMetadata
 
 export const buildCharacterMetadata = () => buildMetadata({ partOfCombat: true } as CharacterMetadata)
 
@@ -30,4 +30,11 @@ export const getMetadata = <T extends MetadataTypes>(item: Item): T => {
 
 export const removeCharacterFromInitiative = (item: Item) => {
   item.metadata[extId('metadata')] = undefined
+}
+
+export const setInitiativeForCharacter = (item: Item, initiative?: number) => {
+  const newMD = getMetadata<CharacterMetadata>(item)
+  newMD.initiative = initiative
+  item.metadata[extId('metadata')] = newMD
+  console.log('Set item metadata', item.metadata)
 }

@@ -14,12 +14,13 @@ export type Fetcher<T> = {
   get: () => Promise<T>
   run: Callback<T>
   waitForScene?: boolean
+  onUnmount?: () => void
 }
 
 export function useOBR<T>(fetchers: Fetcher<T>) {
   const { onChange, get, run, waitForScene } = fetchers
   useEffect(() => {
-    let returnFunction = undefined
+    let returnFunction: (() => void) | undefined = undefined
     OBR.onReady(() => {
       if (waitForScene) {
         OBR.scene.onReadyChange(ready => {
@@ -35,7 +36,10 @@ export function useOBR<T>(fetchers: Fetcher<T>) {
     if (OBR.isReady) {
       get().then(run)
     }
-    return returnFunction
+    return () => {
+      if (returnFunction) returnFunction()
+      if (fetchers.onUnmount) fetchers.onUnmount()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 }
