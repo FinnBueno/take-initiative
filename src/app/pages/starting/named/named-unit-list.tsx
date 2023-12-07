@@ -1,13 +1,13 @@
 import OBR, { Image } from '@owlbear-rodeo/sdk'
 import styled from 'styled-components'
-import { Text, Title } from '../../components/atoms/typography'
+import { Text, Title } from '../../../components/atoms/typography'
 import { createRef } from 'react'
-import { useGMData } from '../../services/gm-data/hook'
-import { useRoomMetadata } from '../../services/metadata/use-room'
-import { InitiativeInput } from './initiative-input'
-import { getMetadata, setInitiativeForCharacter } from '../../../util/general'
-import { CharacterMetadata } from '../../../util/metadata'
-import { NaNToUndefined } from '../../../util/tools'
+import { useGMData } from '../../../services/gm-data/hook'
+import { useRoomMetadata } from '../../../services/metadata/use-room'
+import { InitiativeInput } from '../../../components/molecules/initiative-input'
+import { getMetadata, setInitiativeForCharacter } from '../../../../util/general'
+import { CharacterMetadata } from '../../../../util/metadata'
+import { NaNToUndefined } from '../../../../util/tools'
 
 type Props = {
   units: Image[]
@@ -44,8 +44,8 @@ export const ConfigureNamedUnits = ({ units }: Props) => {
               index={index}
               nextInputs={nextInputs}
               hideToken={hideToken}
-              onChange={e => setInitiativeForCharacter(unit, NaNToUndefined(e.currentTarget.valueAsNumber))}
-              initiative={characterMetadata.initiative}
+              onChange={init => setInitiativeForCharacter(unit, init)}
+              overrideInitiativeValue={characterMetadata.initiative}
               defaultValue={characterMetadata.initiative}
             />
           )

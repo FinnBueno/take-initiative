@@ -1,6 +1,6 @@
 import OBR, { Image } from '@owlbear-rodeo/sdk'
 import styled from 'styled-components'
-import { InitiativeInput } from './initiative-input'
+import { InitiativeInput } from '../../components/molecules/initiative-input'
 import { createRef } from 'react'
 import { useRoomMetadata } from '../../services/metadata/use-room'
 import { Text, Title } from '../../components/atoms/typography'
@@ -43,7 +43,7 @@ export const PlayerInitiativeView = ({ namedTurnTakers }: Props) => {
             hideToken={roomSettings.hideTokensOnInitiativeInput}
             disableRandom
             hidePlayerTag
-            onChange={e => setInitiativeForCharacter(unit, NaNToUndefined(e.currentTarget.valueAsNumber))}
+            onChange={init => setInitiativeForCharacter(unit, NaNToUndefined(init))}
             defaultValue={characterMetadata.initiative}
           />
         )

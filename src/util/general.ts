@@ -52,3 +52,13 @@ export const setInitiativeForCharacter = ({ id }: Item, initiative?: number) => 
     })
   })
 }
+
+export const setInitiativeForList = (toUpdate: Item[], initiative?: number) => {
+  OBR.scene.items.updateItems(toUpdate, (items: Item[]) => {
+    items.forEach(item => {
+      const newMD = getMetadata<CharacterMetadata>(item)
+      newMD.initiative = initiative
+      item.metadata[extId('metadata')] = { ...newMD }
+    })
+  })
+}

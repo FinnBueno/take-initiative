@@ -1,18 +1,19 @@
 import { ReactNode, useEffect, useState } from 'react'
 import './main.css'
 import ORB, { Metadata, Theme } from '@owlbear-rodeo/sdk'
-import { castMetadata } from '../util/general'
-import { SceneInitiativeState, SceneMetadata } from '../util/metadata'
-import { StartingPage } from './pages/starting'
-import { InactivePage } from './pages/inactive'
-import { GMIDContextProvider } from './services/gm-data/context'
+import { castMetadata } from '../../util/general'
+import { SceneInitiativeState, SceneMetadata } from '../../util/metadata'
+import { StartingPage } from './starting'
+import { InactivePage } from './inactive'
+import { GMIDContextProvider } from '../services/gm-data/context'
 import styled, { createGlobalStyle } from 'styled-components'
-import { Cogs } from './components/atoms/svg/cogs'
-import { ButtonIcon } from './components/atoms/button-icon'
-import { Settings } from './pages/settings'
-import { useOBR } from './services/use-obr-data'
+import { Cogs } from '../components/atoms/svg/cogs'
+import { ButtonIcon } from '../components/atoms/button-icon'
+import { Settings } from './settings'
+import { useOBR } from '../services/use-obr-data'
 import OBR from '@owlbear-rodeo/sdk'
-import { SettingsButton } from './pages/settings/settings-button'
+import { SettingsButton } from './settings/settings-button'
+import { RunningPage } from './running'
 
 function App() {
   const [theme, setTheme] = useState<Theme | undefined>()
@@ -28,10 +29,7 @@ function App() {
   useOBR<Metadata>({
     onChange: cb => OBR.scene.onMetadataChange(cb),
     get: () => OBR.scene.getMetadata(),
-    run: md => {
-      console.log('State run!', md)
-      setState(castMetadata<SceneMetadata>(md))
-    },
+    run: md => setState(castMetadata<SceneMetadata>(md)),
     waitForScene: true,
   })
 
@@ -50,7 +48,7 @@ function App() {
       content = <StartingPage />
       break
     case 'RUNNING':
-      content = <>Running!</>
+      content = <RunningPage />
       break
     default:
       content = <></>
@@ -72,6 +70,10 @@ const GlobalStyle = createGlobalStyle<{ isLight: boolean; theme: Theme }>`
   --highlight-color: ${props => props.theme.primary.main};
   --highlight-color-hover: ${props => props.theme.primary.main};
   --text-color: ${props => props.theme.text.primary};
+  --primary-color: ${props => props.theme.primary.main};
+  --primary-text-color: ${props => props.theme.primary.contrastText};
+  --secondary-color: ${props => props.theme.secondary.main};
+  --secondary-text-color: ${props => props.theme.secondary.contrastText};
 
   color: var(--text-color);
 }

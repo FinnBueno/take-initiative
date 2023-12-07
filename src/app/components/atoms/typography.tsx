@@ -5,6 +5,7 @@ const titleSizeLevels = {
   2: '36px',
   3: '28px',
   4: '22px',
+  5: '18px',
 }
 
 type TitleSizeOptions = keyof typeof titleSizeLevels

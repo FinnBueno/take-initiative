@@ -1,9 +1,9 @@
 import { RefObject, ChangeEvent } from 'react'
 import styled from 'styled-components'
 import { Image } from '@owlbear-rodeo/sdk'
-import { Text } from '../../components/atoms/typography'
-import { PlayerTag } from '../../components/molecules/player-tag'
-import { Token } from '../../components/molecules/token'
+import { Text } from '../atoms/typography'
+import { PlayerTag } from './player-tag'
+import { Token } from './token'
 
 type Props = {
   isPlayer: boolean
@@ -14,9 +14,10 @@ type Props = {
   hideToken?: boolean
   disableRandom?: boolean
   hidePlayerTag?: boolean
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void
-  initiative?: number
+  onChange?: (newInitiative: number) => void
+  overrideInitiativeValue?: number
   defaultValue?: number
+  name?: string
 }
 
 export const InitiativeInput = ({
@@ -29,29 +30,33 @@ export const InitiativeInput = ({
   disableRandom = false,
   hidePlayerTag = false,
   onChange = () => {},
-  initiative,
+  overrideInitiativeValue,
   defaultValue,
+  name,
 }: Props) => (
   <TurnTaker>
     <NameContainer>
       {!hideToken && <Token image={unit} height='32px' width='auto' />}
-      <Name>{unit.text.plainText}</Name>
+      <Name>{name ?? unit.text.plainText}</Name>
       {isPlayer && !hidePlayerTag ? <PlayerTag /> : ''}
     </NameContainer>
     {isPlayer && letPlayersEnterOwnInitiative ? (
       <WaitingContainer>
-        <Text>{initiative ? <b>{initiative}</b> : 'Waiting...'}</Text>
+        <Text>{overrideInitiativeValue ? <b>{overrideInitiativeValue}</b> : 'Waiting...'}</Text>
       </WaitingContainer>
     ) : (
       <InitiativeInputField
         ref={index > 0 ? nextInputs[index - 1] : undefined}
         type='number'
         defaultValue={defaultValue}
-        onChange={e => onChange(e)}
+        // TODO: Debounce
+        onChange={e => onChange(e.currentTarget.valueAsNumber)}
         onKeyDown={e => {
           if (e.key !== 'Enter') return
           if (!disableRandom) {
-            e.currentTarget.value = String(Math.ceil(Math.random() * 20))
+            const newInitiative = Math.ceil(Math.random() * 20)
+            e.currentTarget.value = String(newInitiative)
+            onChange(newInitiative)
           }
           const nextInput = index >= nextInputs.length ? undefined : nextInputs[index]
           if (nextInput?.current) {

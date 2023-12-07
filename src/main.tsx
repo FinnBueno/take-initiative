@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './app'
+import App from './app/pages'
 import './index.css'
 import ORB from '@owlbear-rodeo/sdk'
 import { setupContextMenu } from './obr/context-menu'
