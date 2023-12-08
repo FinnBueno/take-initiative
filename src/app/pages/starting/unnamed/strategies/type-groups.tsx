@@ -5,16 +5,14 @@ import { StrategyProps } from '../select-unnamed-strategy'
 import { createRef } from 'react'
 import { setInitiativeForList } from '../../../../../util/general'
 
-type NamedImage = { battleName: string } & Image
-
 type GroupedUnits = {
-  [key: string]: NamedImage[]
+  [key: string]: Image[]
 }
 
-const createNamedImage = (unit: Image, amountBefore: number) => ({
-  battleName: `${unit.name} (${amountBefore + 1})`,
-  ...unit,
-})
+// const createNamedImage = (unit: Image, amountBefore: number) => ({
+//   battleName: `${unit.name} (${amountBefore + 1})`,
+//   ...unit,
+// })
 
 const groupUnits = (units: Image[]): GroupedUnits =>
   Object.fromEntries(
@@ -22,12 +20,14 @@ const groupUnits = (units: Image[]): GroupedUnits =>
       .reduce((total, next) => {
         const collectionForType = total.get(next.name)
         if (collectionForType) {
-          collectionForType.push(createNamedImage(next, collectionForType.length))
+          // collectionForType.push(createNamedImage(next, collectionForType.length))
+          collectionForType.push(next)
         } else {
-          total.set(next.name, [createNamedImage(next, 0)])
+          // total.set(next.name, [createNamedImage(next, 0)])
+          total.set(next.name, [next])
         }
         return total
-      }, new Map<string, NamedImage[]>())
+      }, new Map<string, Image[]>())
       .entries()
   )
 
@@ -46,7 +46,7 @@ export const TypeGroup = ({ units }: StrategyProps) => {
           letPlayersEnterOwnInitiative={false}
           index={index}
           nextInputs={nextInputs}
-          name={type}
+          name={`${type} (x${units.length})`}
           onChange={init => setInitiativeForList(units, init)}
         />
       ))}

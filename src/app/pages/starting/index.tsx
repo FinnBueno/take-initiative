@@ -31,7 +31,7 @@ export const StartingPage = () => {
   //   waitForScene: true,
   // })
 
-  const turnTakers = useTurnTakers(updateTurnTakers, clearInteractions)
+  const turnTakers = useTurnTakers({ onUnmount: clearInteractions })
 
   const clear = () => {
     removeListFromInitiative(turnTakers)

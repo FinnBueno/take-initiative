@@ -5,6 +5,7 @@ import { Button } from '../../../components/atoms/button'
 import { ReactNode, useState } from 'react'
 import { Select } from '../../../components/atoms/select'
 import { TypeGroup } from './strategies/type-groups'
+import { Individual } from './strategies/individual'
 
 export type StrategyProps = { units: Image[] }
 
@@ -20,7 +21,7 @@ const STRATEGIES: Strategy[] = [
     id: 'INDIVIDUAL',
     name: 'Individual',
     description: 'Roll initiative for each character individually',
-    component: TypeGroup,
+    component: Individual,
   },
   {
     id: 'TYPE_GROUP',

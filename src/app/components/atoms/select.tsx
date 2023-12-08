@@ -27,7 +27,9 @@ export function Select<T extends Identifiable>({ options, row, onSelect }: Props
   )
 }
 
-const Option = styled.option``
+const Option = styled.option`
+  color: black;
+`
 
 const StyledSelect = styled.select`
   width: 100%;
