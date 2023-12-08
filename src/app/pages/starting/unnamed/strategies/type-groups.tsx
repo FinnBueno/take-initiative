@@ -1,35 +1,10 @@
-import { Image } from '@owlbear-rodeo/sdk'
 import { InitiativeInput } from '../../../../components/molecules/initiative-input'
 import styled from 'styled-components'
 import { StrategyProps } from '../select-unnamed-strategy'
 import { createRef } from 'react'
-import { setInitiativeForList } from '../../../../../util/general'
-
-type GroupedUnits = {
-  [key: string]: Image[]
-}
-
-// const createNamedImage = (unit: Image, amountBefore: number) => ({
-//   battleName: `${unit.name} (${amountBefore + 1})`,
-//   ...unit,
-// })
-
-const groupUnits = (units: Image[]): GroupedUnits =>
-  Object.fromEntries(
-    units
-      .reduce((total, next) => {
-        const collectionForType = total.get(next.name)
-        if (collectionForType) {
-          // collectionForType.push(createNamedImage(next, collectionForType.length))
-          collectionForType.push(next)
-        } else {
-          // total.set(next.name, [createNamedImage(next, 0)])
-          total.set(next.name, [next])
-        }
-        return total
-      }, new Map<string, Image[]>())
-      .entries()
-  )
+import { getMetadata, setInitiativeForList } from '../../../../../util/general'
+import { CharacterMetadata } from '../../../../../util/metadata'
+import { groupUnits } from '../../../../../util/tools'
 
 export const TypeGroup = ({ units }: StrategyProps) => {
   const groupedUnits = groupUnits(units)
@@ -38,18 +13,25 @@ export const TypeGroup = ({ units }: StrategyProps) => {
 
   return (
     <Wrapper>
-      {groupedUnitsEntries.map(([type, units], index) => (
-        <InitiativeInput
-          key={type}
-          isPlayer={false}
-          unit={units[0]}
-          letPlayersEnterOwnInitiative={false}
-          index={index}
-          nextInputs={nextInputs}
-          name={`${type} (x${units.length})`}
-          onChange={init => setInitiativeForList(units, init)}
-        />
-      ))}
+      {groupedUnitsEntries.map(([type, units], index) => {
+        const storedInitiative = getMetadata<CharacterMetadata>(units[0])?.initiative
+        return (
+          <InitiativeInput
+            key={type}
+            isPlayer={false}
+            unit={units[0]}
+            letPlayersEnterOwnInitiative={false}
+            index={index}
+            nextInputs={nextInputs}
+            name={`${type} (x${units.length})`}
+            defaultValue={storedInitiative}
+            onChange={init => {
+              console.log('onChange', init, units[0].name)
+              setInitiativeForList(units, init)
+            }}
+          />
+        )
+      })}
     </Wrapper>
   )
 }

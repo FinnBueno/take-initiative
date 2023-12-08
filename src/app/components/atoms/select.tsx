@@ -6,9 +6,10 @@ type Props<T extends Identifiable> = {
   options: T[]
   row: (item: T) => string
   onSelect: (item: T) => void
+  defaultOption?: T
 }
 
-export function Select<T extends Identifiable>({ options, row, onSelect }: Props<T>) {
+export function Select<T extends Identifiable>({ options, row, onSelect, defaultOption }: Props<T>) {
   return (
     <StyledSelect
       onChange={e => {
@@ -18,7 +19,7 @@ export function Select<T extends Identifiable>({ options, row, onSelect }: Props
     >
       {options.map(option => {
         return (
-          <Option key={option.id} value={option.id}>
+          <Option selected={option.id === defaultOption?.id} key={option.id} value={option.id}>
             {row(option)}
           </Option>
         )

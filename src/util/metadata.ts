@@ -13,14 +13,17 @@ export const defaultRoomMetadata: RoomMetadata = {
 // scene metadata
 
 export type SceneInitiativeState = 'INACTIVE' | 'STARTING' | 'RUNNING'
+export type UnnamedCharacterStrategy = 'INDIVIDUAL' | 'TYPE_GROUP' | 'ONE_GROUP'
 
 export type SceneMetadata = {
   state: SceneInitiativeState
   round: number
+  unnamedCharacterStrategy: UnnamedCharacterStrategy
 }
 
-export const defaultSceneMetadata: Pick<SceneMetadata, 'round'> = {
+export const defaultSceneMetadata: Pick<SceneMetadata, 'round' | 'unnamedCharacterStrategy'> = {
   round: 0,
+  unnamedCharacterStrategy: 'TYPE_GROUP',
 }
 
 export type RequiredSceneMetadata = Omit<SceneMetadata, keyof typeof defaultSceneMetadata> &

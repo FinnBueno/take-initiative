@@ -10,6 +10,7 @@ type Setting = keyof RoomMetadata
 
 const toggleSetting = (setting: Setting, isTrue: boolean, oldSettings: RoomMetadata) => {
   if (!OBR.isReady) return
+  console.log('toggleSetting', setting)
   switch (setting) {
     case 'preventPlayersFromEnteringOwnInitiative':
       OBR.room.setMetadata(buildRoomMetadata({ preventPlayersFromEnteringOwnInitiative: !isTrue }, oldSettings))
@@ -22,6 +23,7 @@ const toggleSetting = (setting: Setting, isTrue: boolean, oldSettings: RoomMetad
 
 export const Settings = ({ open }: { open: boolean }) => {
   const roomSettings = useRoomMetadata()
+  const { preventPlayersFromEnteringOwnInitiative, hideTokensOnInitiativeInput } = roomSettings
 
   return (
     <Container open={open}>
@@ -29,15 +31,15 @@ export const Settings = ({ open }: { open: boolean }) => {
       <SettingRow>
         <Text>Allow players to submit their own initiative</Text>
         <Checkbox
-          defaultChecked={!roomSettings.preventPlayersFromEnteringOwnInitiative}
-          onToggle={isTrue => toggleSetting('preventPlayersFromEnteringOwnInitiative', isTrue, defaultRoomMetadata)}
+          defaultChecked={!preventPlayersFromEnteringOwnInitiative}
+          onToggle={isTrue => toggleSetting('preventPlayersFromEnteringOwnInitiative', isTrue, roomSettings)}
         />
       </SettingRow>
       <SettingRow>
         <Text>Hide tokens on initiative input</Text>
         <Checkbox
-          defaultChecked={!!roomSettings.hideTokensOnInitiativeInput}
-          onToggle={isTrue => toggleSetting('hideTokensOnInitiativeInput', isTrue, defaultRoomMetadata)}
+          defaultChecked={!!hideTokensOnInitiativeInput}
+          onToggle={isTrue => toggleSetting('hideTokensOnInitiativeInput', isTrue, roomSettings)}
         />
       </SettingRow>
     </Container>
@@ -58,7 +60,7 @@ const Container = styled.div<{ open: boolean }>`
   flex-direction: column;
   justify-content: flex-start;
   padding: 8px 12px 0 12px;
-  height: ${props => (props.open ? '70px' : '0')};
+  height: ${props => (props.open ? '90px' : '0')};
   opacity: ${props => (props.open ? '100%' : '0%')};
   transition: opacity 250ms, height 250ms;
 `

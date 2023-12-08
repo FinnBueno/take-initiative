@@ -4,17 +4,18 @@ import { Image } from '@owlbear-rodeo/sdk'
 import { Text } from '../atoms/typography'
 import { PlayerTag } from './player-tag'
 import { Token } from './token'
+import { NaNToUndefined } from '../../../util/tools'
 
 type Props = {
   isPlayer: boolean
-  unit: Image
+  unit?: Image
   letPlayersEnterOwnInitiative: boolean
-  index: number
-  nextInputs: RefObject<HTMLInputElement>[]
+  index?: number
+  nextInputs?: RefObject<HTMLInputElement>[]
   hideToken?: boolean
   disableRandom?: boolean
   hidePlayerTag?: boolean
-  onChange?: (newInitiative: number) => void
+  onChange?: (newInitiative?: number) => void
   overrideInitiativeValue?: number
   defaultValue?: number
   name?: string
@@ -36,8 +37,8 @@ export const InitiativeInput = ({
 }: Props) => (
   <TurnTaker>
     <NameContainer>
-      {!hideToken && <Token image={unit} height='32px' width='auto' />}
-      <Name>{name ?? unit.text.plainText}</Name>
+      {!hideToken && unit && <Token image={unit} height='32px' width='auto' />}
+      <Name>{name ?? unit?.text.plainText}</Name>
       {isPlayer && !hidePlayerTag ? <PlayerTag /> : ''}
     </NameContainer>
     {isPlayer && letPlayersEnterOwnInitiative ? (
@@ -46,11 +47,11 @@ export const InitiativeInput = ({
       </WaitingContainer>
     ) : (
       <InitiativeInputField
-        ref={index > 0 ? nextInputs[index - 1] : undefined}
+        ref={index !== undefined && nextInputs && index > 0 ? nextInputs[index - 1] : undefined}
         type='number'
         defaultValue={defaultValue}
         // TODO: Debounce
-        onChange={e => onChange(e.currentTarget.valueAsNumber)}
+        onChange={e => onChange(NaNToUndefined(e.currentTarget.valueAsNumber))}
         onKeyDown={e => {
           if (e.key !== 'Enter') return
           if (!disableRandom) {
@@ -58,10 +59,12 @@ export const InitiativeInput = ({
             e.currentTarget.value = String(newInitiative)
             onChange(newInitiative)
           }
-          const nextInput = index >= nextInputs.length ? undefined : nextInputs[index]
-          if (nextInput?.current) {
-            nextInput.current.focus()
-            nextInput.current.select()
+          if (nextInputs && index !== undefined) {
+            const nextInput = index >= nextInputs.length ? undefined : nextInputs[index]
+            if (nextInput?.current) {
+              nextInput.current.focus()
+              nextInput.current.select()
+            }
           }
         }}
       />

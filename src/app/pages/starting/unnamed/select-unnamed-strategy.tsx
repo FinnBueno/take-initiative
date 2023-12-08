@@ -2,15 +2,17 @@ import styled from 'styled-components'
 import { Text, Title } from '../../../components/atoms/typography'
 import { Image } from '@owlbear-rodeo/sdk'
 import { Button } from '../../../components/atoms/button'
-import { ReactNode, useState } from 'react'
+import { ReactNode, useCallback, useMemo, useState } from 'react'
 import { Select } from '../../../components/atoms/select'
 import { TypeGroup } from './strategies/type-groups'
 import { Individual } from './strategies/individual'
+import { SingleGroup } from './strategies/single-group'
+import { UnnamedCharacterStrategy } from '../../../../util/metadata'
 
 export type StrategyProps = { units: Image[] }
 
 type Strategy = {
-  id: string
+  id: UnnamedCharacterStrategy
   name: string
   description: string
   component: (props: StrategyProps) => ReactNode
@@ -33,16 +35,18 @@ const STRATEGIES: Strategy[] = [
     id: 'ONE_GROUP',
     name: 'One group',
     description: 'Group unnamed tokens together and roll once',
-    component: TypeGroup,
+    component: SingleGroup,
   },
 ]
 
 type Props = {
   units: Image[]
+  currentStrategy: UnnamedCharacterStrategy
+  updateStrategy: (newStrat: UnnamedCharacterStrategy) => void
 }
 
-export const SelectUnnamedStrategy = ({ units }: Props) => {
-  const [strategy, selectStrategy] = useState<Strategy | undefined>(undefined)
+export const SelectUnnamedStrategy = ({ units, currentStrategy, updateStrategy }: Props) => {
+  const strategy = useMemo(() => STRATEGIES.find(s => s.id === currentStrategy), [currentStrategy])
   const StrategyComponent = strategy?.component
   return (
     <Wrapper>
@@ -51,7 +55,8 @@ export const SelectUnnamedStrategy = ({ units }: Props) => {
       <Select<Strategy>
         options={STRATEGIES}
         row={strat => `${strat.name} - ${strat.description}`}
-        onSelect={selectStrategy}
+        onSelect={strat => updateStrategy(strat.id)}
+        defaultOption={strategy}
       />
       {StrategyComponent && <StrategyComponent units={units} />}
     </Wrapper>

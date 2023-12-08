@@ -2,7 +2,8 @@ import { InitiativeInput } from '../../../../components/molecules/initiative-inp
 import styled from 'styled-components'
 import { StrategyProps } from '../select-unnamed-strategy'
 import { createRef } from 'react'
-import { setInitiativeForCharacter } from '../../../../../util/general'
+import { getMetadata, setInitiativeForCharacter } from '../../../../../util/general'
+import { CharacterMetadata } from '../../../../../util/metadata'
 
 export const Individual = ({ units }: StrategyProps) => {
   const sortedUnits = units.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
@@ -16,18 +17,22 @@ export const Individual = ({ units }: StrategyProps) => {
   }
   return (
     <Wrapper>
-      {sortedUnits.map((unit, index) => (
-        <InitiativeInput
-          key={unit.id}
-          isPlayer={false}
-          unit={unit}
-          letPlayersEnterOwnInitiative={false}
-          index={index}
-          nextInputs={nextInputs}
-          name={`${unit.name} (${updateNameCounter(unit.name)})`}
-          onChange={init => setInitiativeForCharacter(unit, init)}
-        />
-      ))}
+      {sortedUnits.map((unit, index) => {
+        const storedInitiative = getMetadata<CharacterMetadata>(unit)?.initiative
+        return (
+          <InitiativeInput
+            key={unit.id}
+            isPlayer={false}
+            unit={unit}
+            letPlayersEnterOwnInitiative={false}
+            index={index}
+            nextInputs={nextInputs}
+            name={`${unit.name} (${updateNameCounter(unit.name)})`}
+            onChange={init => setInitiativeForCharacter(unit, init)}
+            defaultValue={storedInitiative}
+          />
+        )
+      })}
     </Wrapper>
   )
 }

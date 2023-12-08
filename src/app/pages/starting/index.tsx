@@ -1,6 +1,6 @@
 import OBR, { Image, StopInteraction } from '@owlbear-rodeo/sdk'
-import { buildSceneMetadata, getMetadata, removeListFromInitiative } from '../../../util/general'
-import { CharacterMetadata } from '../../../util/metadata'
+import { buildSceneMetadata, getMetadata, removeListFromInitiative, setInitiativeForList } from '../../../util/general'
+import { CharacterMetadata, UnnamedCharacterStrategy } from '../../../util/metadata'
 import styled from 'styled-components'
 import { Button } from '../../components/atoms/button'
 import { useGMData } from '../../services/gm-data/hook'
@@ -9,65 +9,50 @@ import { ConfigureNamedUnits } from './named/named-unit-list'
 import { PlayerInitiativeView } from './player-view'
 import { SelectUnnamedStrategy } from './unnamed/select-unnamed-strategy'
 import { useTurnTakers } from '../../services/metadata/use-turn-takers'
+import { useState } from 'react'
+import { Error } from '../../components/molecules/error'
+import { useScene } from '../../services/metadata/use-scene'
+import { seperateNamedAndUnnamed } from '../../../util/tools'
 
 let interactions: { [id: string]: StopInteraction } = {}
 
+const clearInteractions = () => {
+  Object.values(interactions).forEach(stop => stop())
+  interactions = {}
+}
+
 export const StartingPage = () => {
-  // const [turnTakers, setTurnTakers] = useState<Image[]>([])
-
-  const updateTurnTakers = (newItems: Image[]) =>
-    newItems.filter(item => getMetadata<CharacterMetadata>(item)?.partOfCombat)
-
-  const clearInteractions = () => {
-    Object.values(interactions).forEach(stop => stop())
-    interactions = {}
-  }
-
-  // useOBR<Item[]>({
-  //   onChange: cb => OBR.scene.items.onChange(cb),
-  //   get: () => OBR.scene.items.getItems(),
-  //   run: updateTurnTakers,
-  //   onUnmount: clearInteractions,
-  //   waitForScene: true,
-  // })
-
   const turnTakers = useTurnTakers({ onUnmount: clearInteractions })
+
+  const { isGM } = useGMData()
+
+  const { preventPlayersFromEnteringOwnInitiative } = useRoomMetadata()
+
+  const { unnamedCharacterStrategy, updateUnnamedCharacterStrategy } = useScene()
 
   const clear = () => {
     removeListFromInitiative(turnTakers)
     OBR.scene.setMetadata(buildSceneMetadata({ state: 'INACTIVE' }))
   }
 
+  const [userIsSureToContinue, setUserIsSureToContinue] = useState(false)
+  const assureEveryoneHasPermission = () =>
+    userIsSureToContinue ||
+    turnTakers.filter(tt => getMetadata<CharacterMetadata>(tt)?.initiative === undefined).length === 0
+
   const start = () => {
-    OBR.scene.setMetadata(buildSceneMetadata({ state: 'RUNNING' }))
+    if (assureEveryoneHasPermission()) {
+      OBR.scene.setMetadata(buildSceneMetadata({ state: 'RUNNING' }))
+    } else {
+      setUserIsSureToContinue(true)
+      setTimeout(() => setUserIsSureToContinue(false), 5000)
+    }
   }
 
-  // const turnTakerClicked = (item: Item) => {
-  //   if (interactions[item.id]) {
-  //     interactions[item.id]()
-  //     delete interactions[item.id]
-  //   } else {
-  //     clearInteractions()
-  //     OBR.interaction
-  //       .startItemInteraction(item)
-  //       .then(interactionManager => (interactions = { ...interactions, [item.id]: interactionManager[1] }))
-  //   }
-  // }
-
-  const [namedTurnTakers, unnamedTurnTakers] = turnTakers.reduce<[Image[], Image[]]>(
-    (total, next) => {
-      total[next.text.plainText ? 0 : 1].push(next)
-      return total
-    },
-    [[], []]
-  )
-
-  const { isGM } = useGMData()
-
-  const roomSettings = useRoomMetadata()
+  const [namedTurnTakers, unnamedTurnTakers] = seperateNamedAndUnnamed(turnTakers)
 
   if (!isGM) {
-    if (roomSettings.preventPlayersFromEnteringOwnInitiative) {
+    if (preventPlayersFromEnteringOwnInitiative) {
       return <Wrapper>Entering initiatives...</Wrapper>
     } else {
       return (
@@ -78,10 +63,23 @@ export const StartingPage = () => {
     }
   }
 
+  const onUpdateUnnamedCharacterStrategy = (strategy: UnnamedCharacterStrategy) => {
+    updateUnnamedCharacterStrategy(strategy)
+    setInitiativeForList(unnamedTurnTakers, undefined)
+  }
+
   return (
     <Wrapper>
       <ConfigureNamedUnits units={namedTurnTakers} />
-      <SelectUnnamedStrategy units={unnamedTurnTakers} />
+      <SelectUnnamedStrategy
+        units={unnamedTurnTakers}
+        currentStrategy={unnamedCharacterStrategy}
+        updateStrategy={onUpdateUnnamedCharacterStrategy}
+      />
+      <Error
+        visible={userIsSureToContinue}
+        text='Not all characters have an initiative set, are you sure you want to continue?'
+      />
       <ButtonContainer>
         <Button onClick={clear}>Cancel</Button>
         <Button primary onClick={start}>

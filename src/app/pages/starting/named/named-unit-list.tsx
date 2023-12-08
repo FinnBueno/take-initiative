@@ -1,4 +1,4 @@
-import OBR, { Image } from '@owlbear-rodeo/sdk'
+import { Image } from '@owlbear-rodeo/sdk'
 import styled from 'styled-components'
 import { Text, Title } from '../../../components/atoms/typography'
 import { createRef } from 'react'
@@ -7,7 +7,6 @@ import { useRoomMetadata } from '../../../services/metadata/use-room'
 import { InitiativeInput } from '../../../components/molecules/initiative-input'
 import { getMetadata, setInitiativeForCharacter } from '../../../../util/general'
 import { CharacterMetadata } from '../../../../util/metadata'
-import { NaNToUndefined } from '../../../../util/tools'
 
 type Props = {
   units: Image[]
@@ -18,10 +17,7 @@ export const ConfigureNamedUnits = ({ units }: Props) => {
 
   const dmData = useGMData()
 
-  const roomSettings = useRoomMetadata()
-
-  const letPlayersEnterOwnInitiative = !roomSettings.preventPlayersFromEnteringOwnInitiative
-  const hideToken = roomSettings.hideTokensOnInitiativeInput
+  const { preventPlayersFromEnteringOwnInitiative, hideTokensOnInitiativeInput } = useRoomMetadata()
 
   return (
     <Wrapper>
@@ -40,10 +36,10 @@ export const ConfigureNamedUnits = ({ units }: Props) => {
               key={unit.id}
               isPlayer={isPlayer}
               unit={unit}
-              letPlayersEnterOwnInitiative={letPlayersEnterOwnInitiative}
+              letPlayersEnterOwnInitiative={!preventPlayersFromEnteringOwnInitiative}
               index={index}
               nextInputs={nextInputs}
-              hideToken={hideToken}
+              hideToken={hideTokensOnInitiativeInput}
               onChange={init => setInitiativeForCharacter(unit, init)}
               overrideInitiativeValue={characterMetadata.initiative}
               defaultValue={characterMetadata.initiative}

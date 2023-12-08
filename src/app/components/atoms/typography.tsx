@@ -17,9 +17,10 @@ export const Title = styled.h1<{ $level?: TitleSizeOptions }>`
   ${props => `font-size: ${titleSizeLevels[props.$level ?? 1]};`}
 `
 
-export const Text = styled.p`
+export const Text = styled.p<{ $variant?: 'danger' }>`
   line-height: 1;
   margin: 0;
+  ${props => (props.$variant === 'danger' ? 'color: var(--danger-color);' : '')}
 `
 
 export const HandwritingTitle = styled(Title)`

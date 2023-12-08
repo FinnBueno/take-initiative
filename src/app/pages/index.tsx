@@ -7,8 +7,6 @@ import { StartingPage } from './starting'
 import { InactivePage } from './inactive'
 import { GMIDContextProvider } from '../services/gm-data/context'
 import styled, { createGlobalStyle } from 'styled-components'
-import { Cogs } from '../components/atoms/svg/cogs'
-import { ButtonIcon } from '../components/atoms/button-icon'
 import { Settings } from './settings'
 import { useOBR } from '../services/use-obr-data'
 import OBR from '@owlbear-rodeo/sdk'
@@ -75,6 +73,8 @@ const GlobalStyle = createGlobalStyle<{ isLight: boolean; theme: Theme }>`
   --secondary-color: ${props => props.theme.secondary.main};
   --secondary-text-color: ${props => props.theme.secondary.contrastText};
 
+  --danger-color: #E83444;
+
   color: var(--text-color);
 }
 `
@@ -82,6 +82,7 @@ const GlobalStyle = createGlobalStyle<{ isLight: boolean; theme: Theme }>`
 const Container = styled.div`
   display: flex;
   flex-direction: column;
+  width: 100%;
 `
 
 export default App
