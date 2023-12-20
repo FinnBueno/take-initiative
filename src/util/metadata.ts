@@ -1,13 +1,27 @@
 // room metadata
 
+export type TokenSetting = {
+  ac?: number
+  maxHealth?: number
+  tokenName: string
+  tokenUrl: string
+  statblockUrl?: string
+}
+
 export type RoomMetadata = {
   preventPlayersFromEnteringOwnInitiative?: boolean
   hideTokensOnInitiativeInput?: boolean
+  addIdentifiersToUnnamedTokens?: boolean
+  replaceHPWithDamageTaken?: boolean
+  tokenSettings: { [key: string]: TokenSetting }
 }
 
 export const defaultRoomMetadata: RoomMetadata = {
   preventPlayersFromEnteringOwnInitiative: false,
   hideTokensOnInitiativeInput: false,
+  addIdentifiersToUnnamedTokens: true,
+  replaceHPWithDamageTaken: false,
+  tokenSettings: {},
 }
 
 // scene metadata
@@ -34,4 +48,5 @@ export type RequiredSceneMetadata = Omit<SceneMetadata, keyof typeof defaultScen
 export type CharacterMetadata = {
   partOfCombat: boolean
   initiative?: number
+  health?: number
 }

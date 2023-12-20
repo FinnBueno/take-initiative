@@ -12,6 +12,7 @@ type Props<T extends Identifiable> = {
 export function Select<T extends Identifiable>({ options, row, onSelect, defaultOption }: Props<T>) {
   return (
     <StyledSelect
+      defaultValue={defaultOption?.id}
       onChange={e => {
         const option = options.find(o => o.id === e.target.value)
         if (option) onSelect(option)
@@ -19,7 +20,7 @@ export function Select<T extends Identifiable>({ options, row, onSelect, default
     >
       {options.map(option => {
         return (
-          <Option selected={option.id === defaultOption?.id} key={option.id} value={option.id}>
+          <Option key={option.id} value={option.id}>
             {row(option)}
           </Option>
         )

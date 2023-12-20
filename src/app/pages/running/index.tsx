@@ -1,17 +1,22 @@
 import styled from 'styled-components'
 import { useTurnTakers } from '../../services/metadata/use-turn-takers'
-import { buildSceneMetadata, getMetadata } from '../../../util/general'
+import { buildSceneMetadata, getMetadata, removeUnnamedLabels } from '../../../util/general'
 import { CharacterMetadata, UnnamedCharacterStrategy } from '../../../util/metadata'
-import { Text, Title } from '../../components/atoms/typography'
+import { HandwritingTitle, Title } from '../../components/atoms/typography'
 import OBR, { Image, Item } from '@owlbear-rodeo/sdk'
 import { Button } from '../../components/atoms/button'
 import { useScene } from '../../services/metadata/use-scene'
 import { groupUnits, seperateNamedAndUnnamed } from '../../../util/tools'
-import { useMemo } from 'react'
+import { createRef, useMemo, useState } from 'react'
 import { InitiativeEntry, InitiativeRow } from './initiative-row'
 import { useRoomMetadata } from '../../services/metadata/use-room'
+import { useGMData } from '../../services/gm-data/hook'
 
-const generateInitiativeList = (units: Image[], strategy: UnnamedCharacterStrategy): Map<number, InitiativeEntry[]> => {
+const generateInitiativeList = (
+  units: Image[],
+  strategy: UnnamedCharacterStrategy,
+  gmIDs: string[]
+): Map<number, InitiativeEntry[]> => {
   const [named, unnamed] = seperateNamedAndUnnamed(units)
   const result = new Map<number, InitiativeEntry[]>()
 
@@ -22,16 +27,18 @@ const generateInitiativeList = (units: Image[], strategy: UnnamedCharacterStrate
     result.set(initiative, [...othersAtInitiative, { ...entry, initiative }])
   }
 
-  named.forEach(unit =>
-    setAtInitiative(
+  named.forEach(unit => {
+    const isPlayer = !gmIDs.find(dmID => dmID === unit.createdUserId)
+    return setAtInitiative(
       {
         name: unit.text.plainText,
         id: unit.id,
         units: [unit],
+        isPlayer,
       },
       unit
     )
-  )
+  })
 
   switch (strategy) {
     case 'INDIVIDUAL': {
@@ -44,6 +51,7 @@ const generateInitiativeList = (units: Image[], strategy: UnnamedCharacterStrate
             name: `${unit.name} (${indexOfType + 1})`,
             id: unit.id,
             units: [unit],
+            isPlayer: false,
           },
           unit
         )
@@ -57,6 +65,7 @@ const generateInitiativeList = (units: Image[], strategy: UnnamedCharacterStrate
             name: `${units[0].name} (x${units.length})`,
             id: key,
             units: units,
+            isPlayer: false,
           },
           units[0]
         )
@@ -69,6 +78,7 @@ const generateInitiativeList = (units: Image[], strategy: UnnamedCharacterStrate
           name: 'Unnamed Characters',
           id: 'unnamed-characters',
           units: unnamed,
+          isPlayer: false,
         },
         unnamed[0]
       )
@@ -80,35 +90,54 @@ const generateInitiativeList = (units: Image[], strategy: UnnamedCharacterStrate
 }
 
 export const RunningPage = () => {
-  const { hideTokensOnInitiativeInput } = useRoomMetadata()
-  const { round, unnamedCharacterStrategy } = useScene()
+  const {
+    room: { hideTokensOnInitiativeInput, tokenSettings },
+  } = useRoomMetadata()
+
+  const { metadata } = useScene()
+  const { unnamedCharacterStrategy } = metadata
+
+  const goBack = () => {
+    // TODO: Change these state changes to not remove all metadata from the scene
+    removeUnnamedLabels().then(() => OBR.scene.setMetadata(buildSceneMetadata({ state: 'STARTING' }, metadata)))
+  }
+
   const turnTakers = useTurnTakers()
-  const goBack = () => OBR.scene.setMetadata(buildSceneMetadata({ state: 'STARTING' }))
+
+  const { gmIDs } = useGMData()
+
   const initiativeList = useMemo(
-    () => generateInitiativeList(turnTakers, unnamedCharacterStrategy),
-    [turnTakers, unnamedCharacterStrategy]
+    () => generateInitiativeList(turnTakers, unnamedCharacterStrategy, gmIDs),
+    [turnTakers, unnamedCharacterStrategy, gmIDs]
   )
+
   return (
     <Wrapper>
       <SideSpace>
-        <Title $level={3}>Round: {round + 1}</Title>
+        <Title $level={3}>Running combat</Title>
         {[...initiativeList.entries()]
           .sort(([a], [b]) => b - a)
-          .map(([initiative, units]) => {
-            return (
-              <InitiativeContainer>
-                <InitiativeIndicatorContainer>
-                  <InitiativeIndicator $level={5}>{initiative}</InitiativeIndicator>
-                </InitiativeIndicatorContainer>
-                <Entries>
-                  {units.map(unit => (
-                    <InitiativeRow key={unit.id} entry={unit} hideToken={hideTokensOnInitiativeInput} />
-                  ))}
-                </Entries>
-              </InitiativeContainer>
-            )
-          })}
-        <ClearButton onClick={goBack}>Go Back</ClearButton>
+          .map(([initiative, units]) => (
+            <InitiativeContainer key={initiative}>
+              <InitiativeIndicatorContainer>
+                <InitiativeIndicator $level={5}>{initiative}</InitiativeIndicator>
+              </InitiativeIndicatorContainer>
+              <Entries>
+                {units.map(unit => (
+                  <InitiativeRow
+                    key={unit.id}
+                    tokenSetting={tokenSettings[unit.units[0].name]}
+                    entry={unit}
+                    hideToken={hideTokensOnInitiativeInput}
+                    startTabOnNext={() => {
+                      console.log('TODO: Go to next item')
+                    }}
+                  />
+                ))}
+              </Entries>
+            </InitiativeContainer>
+          ))}
+        <ClearButton onClick={goBack}>Quit Combat</ClearButton>
       </SideSpace>
     </Wrapper>
   )
@@ -138,9 +167,10 @@ const InitiativeIndicatorContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: background-color 0.25s;
 `
 
-const InitiativeIndicator = styled(Title)`
+const InitiativeIndicator = styled(Title)<{ isActive: boolean }>`
   margin-bottom: -1px;
 `
 

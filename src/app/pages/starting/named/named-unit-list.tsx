@@ -3,21 +3,24 @@ import styled from 'styled-components'
 import { Text, Title } from '../../../components/atoms/typography'
 import { createRef } from 'react'
 import { useGMData } from '../../../services/gm-data/hook'
-import { useRoomMetadata } from '../../../services/metadata/use-room'
 import { InitiativeInput } from '../../../components/molecules/initiative-input'
 import { getMetadata, setInitiativeForCharacter } from '../../../../util/general'
 import { CharacterMetadata } from '../../../../util/metadata'
 
 type Props = {
   units: Image[]
+  preventPlayersFromEnteringOwnInitiative: boolean
+  hideTokensOnInitiativeInput: boolean
 }
 
-export const ConfigureNamedUnits = ({ units }: Props) => {
+export const ConfigureNamedUnits = ({
+  units,
+  preventPlayersFromEnteringOwnInitiative,
+  hideTokensOnInitiativeInput,
+}: Props) => {
   const nextInputs = Array.from({ length: units.length - 1 }, () => createRef<HTMLInputElement>())
 
   const dmData = useGMData()
-
-  const { preventPlayersFromEnteringOwnInitiative, hideTokensOnInitiativeInput } = useRoomMetadata()
 
   return (
     <Wrapper>

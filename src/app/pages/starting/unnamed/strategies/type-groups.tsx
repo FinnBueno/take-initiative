@@ -25,10 +25,7 @@ export const TypeGroup = ({ units }: StrategyProps) => {
             nextInputs={nextInputs}
             name={`${type} (x${units.length})`}
             defaultValue={storedInitiative}
-            onChange={init => {
-              console.log('onChange', init, units[0].name)
-              setInitiativeForList(units, init)
-            }}
+            onChange={init => setInitiativeForList(units, init)}
           />
         )
       })}

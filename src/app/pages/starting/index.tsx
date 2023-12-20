@@ -1,5 +1,11 @@
-import OBR, { Image, StopInteraction } from '@owlbear-rodeo/sdk'
-import { buildSceneMetadata, getMetadata, removeListFromInitiative, setInitiativeForList } from '../../../util/general'
+import OBR, { StopInteraction } from '@owlbear-rodeo/sdk'
+import {
+  addNicknamesToTokens,
+  buildSceneMetadata,
+  getMetadata,
+  removeListFromInitiative,
+  setInitiativeForList,
+} from '../../../util/general'
 import { CharacterMetadata, UnnamedCharacterStrategy } from '../../../util/metadata'
 import styled from 'styled-components'
 import { Button } from '../../components/atoms/button'
@@ -26,13 +32,16 @@ export const StartingPage = () => {
 
   const { isGM } = useGMData()
 
-  const { preventPlayersFromEnteringOwnInitiative } = useRoomMetadata()
+  const {
+    room: { preventPlayersFromEnteringOwnInitiative, addIdentifiersToUnnamedTokens, hideTokensOnInitiativeInput },
+  } = useRoomMetadata()
 
-  const { unnamedCharacterStrategy, updateUnnamedCharacterStrategy } = useScene()
+  const { metadata: sceneData, updateUnnamedCharacterStrategy } = useScene()
+  const { unnamedCharacterStrategy } = sceneData
 
   const clear = () => {
     removeListFromInitiative(turnTakers)
-    OBR.scene.setMetadata(buildSceneMetadata({ state: 'INACTIVE' }))
+    OBR.scene.setMetadata(buildSceneMetadata({ state: 'INACTIVE' }, sceneData))
   }
 
   const [userIsSureToContinue, setUserIsSureToContinue] = useState(false)
@@ -40,16 +49,22 @@ export const StartingPage = () => {
     userIsSureToContinue ||
     turnTakers.filter(tt => getMetadata<CharacterMetadata>(tt)?.initiative === undefined).length === 0
 
+  const [namedTurnTakers, unnamedTurnTakers] = seperateNamedAndUnnamed(turnTakers)
+
   const start = () => {
     if (assureEveryoneHasPermission()) {
-      OBR.scene.setMetadata(buildSceneMetadata({ state: 'RUNNING' }))
+      if (addIdentifiersToUnnamedTokens) {
+        addNicknamesToTokens(unnamedTurnTakers, namedTurnTakers).then(() =>
+          OBR.scene.setMetadata(buildSceneMetadata({ state: 'RUNNING' }, sceneData))
+        )
+      } else {
+        OBR.scene.setMetadata(buildSceneMetadata({ state: 'RUNNING' }, sceneData))
+      }
     } else {
       setUserIsSureToContinue(true)
       setTimeout(() => setUserIsSureToContinue(false), 5000)
     }
   }
-
-  const [namedTurnTakers, unnamedTurnTakers] = seperateNamedAndUnnamed(turnTakers)
 
   if (!isGM) {
     if (preventPlayersFromEnteringOwnInitiative) {
@@ -70,7 +85,11 @@ export const StartingPage = () => {
 
   return (
     <Wrapper>
-      <ConfigureNamedUnits units={namedTurnTakers} />
+      <ConfigureNamedUnits
+        units={namedTurnTakers}
+        preventPlayersFromEnteringOwnInitiative={!!preventPlayersFromEnteringOwnInitiative}
+        hideTokensOnInitiativeInput={!!hideTokensOnInitiativeInput}
+      />
       <SelectUnnamedStrategy
         units={unnamedTurnTakers}
         currentStrategy={unnamedCharacterStrategy}
@@ -82,7 +101,7 @@ export const StartingPage = () => {
       />
       <ButtonContainer>
         <Button onClick={clear}>Cancel</Button>
-        <Button primary onClick={start}>
+        <Button $primary onClick={start}>
           Start
         </Button>
       </ButtonContainer>

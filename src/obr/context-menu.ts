@@ -1,9 +1,10 @@
-import ORB, { Image, Item } from '@owlbear-rodeo/sdk'
-import { buildCharacterMetadata, buildSceneMetadata, extId } from '../util/general'
+import OBR, { Image, Item } from '@owlbear-rodeo/sdk'
+import { buildCharacterMetadata, buildSceneMetadata, castMetadata, extId } from '../util/general'
 import { INITIATIVE_KEY } from '../util/constants'
+import { SceneMetadata } from '../util/metadata'
 
 export const setupContextMenu = () => {
-  ORB.contextMenu.create({
+  OBR.contextMenu.create({
     id: extId('context-menu'),
     icons: [
       {
@@ -27,12 +28,14 @@ export const setupContextMenu = () => {
       },
     ],
     onClick(context) {
-      ORB.scene.items.updateItems(context.items, (items: Item[]) => {
-        const images = items.filter(token => token.type === 'IMAGE') as Image[]
-        ORB.scene.setMetadata(buildSceneMetadata({ state: 'STARTING' }))
-        for (const image of images) {
-          image.metadata = buildCharacterMetadata()
-        }
+      OBR.scene.getMetadata().then(sceneMD => {
+        OBR.scene.setMetadata(buildSceneMetadata({ state: 'STARTING' }, castMetadata<SceneMetadata>(sceneMD)))
+        OBR.scene.items.updateItems(context.items, (items: Item[]) => {
+          const images = items.filter(token => token.type === 'IMAGE' && token.layer === 'CHARACTER') as Image[]
+          for (const image of images) {
+            image.metadata = buildCharacterMetadata()
+          }
+        })
       })
     },
   })

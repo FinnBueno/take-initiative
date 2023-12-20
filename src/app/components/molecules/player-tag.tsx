@@ -4,7 +4,6 @@ import { Caption } from '../atoms/typography'
 export const PlayerTag = () => (
   <Tag>
     <Caption>Player</Caption>
-    {/* <UserIcon size='16px' /> */}
   </Tag>
 )
 

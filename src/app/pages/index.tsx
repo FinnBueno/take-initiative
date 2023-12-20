@@ -1,13 +1,13 @@
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import './main.css'
-import ORB, { Metadata, Theme } from '@owlbear-rodeo/sdk'
+import { Metadata, Theme } from '@owlbear-rodeo/sdk'
 import { castMetadata } from '../../util/general'
 import { SceneInitiativeState, SceneMetadata } from '../../util/metadata'
 import { StartingPage } from './starting'
 import { InactivePage } from './inactive'
 import { GMIDContextProvider } from '../services/gm-data/context'
 import styled, { createGlobalStyle } from 'styled-components'
-import { Settings } from './settings'
+import { Settings } from './settings/settings'
 import { useOBR } from '../services/use-obr-data'
 import OBR from '@owlbear-rodeo/sdk'
 import { SettingsButton } from './settings/settings-button'
@@ -75,7 +75,17 @@ const GlobalStyle = createGlobalStyle<{ isLight: boolean; theme: Theme }>`
 
   --danger-color: #E83444;
 
+  --darken: rgba(255,255,255, 0.1);
+
   color: var(--text-color);
+}
+
+p, h1 {
+  user-select: none;
+}
+
+svg {
+  fill: var(--text-color);
 }
 `
 
