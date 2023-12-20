@@ -1,11 +1,10 @@
 import styled from 'styled-components'
 import { Button } from '../../components/atoms/button'
 import { Text, Title } from '../../components/atoms/typography'
-import OBR, { Image, isImage } from '@owlbear-rodeo/sdk'
+import OBR, { Image } from '@owlbear-rodeo/sdk'
 import { useOBR } from '../../services/use-obr-data'
 import { useMemo, useState } from 'react'
 import { Divider } from '../../components/atoms/divider'
-import { useScene } from '../../services/metadata/use-scene'
 import { TokenConfiguration } from './token-configuration'
 import { ButtonIcon } from '../../components/atoms/button-icon'
 import { Create } from '../../components/atoms/svg/create'
@@ -39,7 +38,7 @@ export const TokenStatsPage = ({ goBack }: Props) => {
     run: updateSelection,
   })
 
-  const { room, updateTokenConfigurations, deleteTokenConfiguration } = useRoomMetadata()
+  const { room, updateTokenConfigurations, deleteTokenConfiguration: _ } = useRoomMetadata()
   const { tokenSettings } = room
 
   const tokenSettingsNames = Object.keys(tokenSettings)

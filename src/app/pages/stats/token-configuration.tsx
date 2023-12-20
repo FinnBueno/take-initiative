@@ -1,12 +1,10 @@
 import styled from 'styled-components'
 import { TokenSetting } from '../../../util/metadata'
-import { SmallInputField } from '../../components/atoms/small-input-field'
 import { Heart } from '../../components/atoms/svg/heart'
 import { Shield } from '../../components/atoms/svg/shield'
 import { Text } from '../../components/atoms/typography'
 import { ChangeEvent } from 'react'
 import { Statblock } from '../../components/atoms/svg/statblock'
-import { ButtonIcon } from '../../components/atoms/button-icon'
 import { StatInput } from '../../components/molecules/stat-input'
 
 type TokenOption = keyof Pick<TokenSetting, 'maxHealth' | 'ac' | 'statblockUrl'>
